@@ -17,9 +17,12 @@ SOURCE_ROOT=$PWD
 BUILD_FOLDER=$BUILD_ROOT/build-$BUILD_CONFIG
 INSTALLER_FOLDER=$BUILD_ROOT/installer-$BUILD_CONFIG
 
-# Use override version if provided, otherwise read from version.txt
-if [ "$OVERRIDE_VERSION" != "" ]; then
+# Use an override version if provided (OVERRIDE_VERSION for local builds,
+# CI_VERSION for upstream's CI), otherwise read from version.txt
+if [ -n "$OVERRIDE_VERSION" ]; then
   VERSION="$OVERRIDE_VERSION"
+elif [ -n "$CI_VERSION" ]; then
+  VERSION="$CI_VERSION"
 else
   VERSION=`cat $SOURCE_ROOT/app/version.txt`
 fi
@@ -33,12 +36,20 @@ fi
 
 [ "$SIGNING_IDENTITY" == "" ] || git diff-index --quiet HEAD -- || fail "Signed release builds must not have unstaged changes!"
 
+echo Updating dependencies
+python3 $SOURCE_ROOT/setup-deps.py
+
 echo Cleaning output directories
 rm -rf $BUILD_FOLDER
 rm -rf $INSTALLER_FOLDER
 mkdir $BUILD_ROOT
 mkdir $BUILD_FOLDER
 mkdir $INSTALLER_FOLDER
+
+# Enable LTO for official builds
+export CFLAGS=-flto=thin
+export CXXFLAGS=-flto=thin
+export LDFLAGS=-flto=thin
 
 echo Configuring the project
 pushd $BUILD_FOLDER

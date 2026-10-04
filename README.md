@@ -10,6 +10,7 @@ Artemis Qt is built upon the excellent foundation of [**Moonlight Qt**](https://
 - **Core streaming technology** - [Moonlight Qt](https://github.com/moonlight-stream/moonlight-qt)
 - **Enhanced features inspiration** - [Artemis Android](https://github.com/ClassicOldSong/moonlight-android) by [ClassicOldSong](https://github.com/ClassicOldSong)
 - **Server compatibility** - [Apollo](https://github.com/ClassicOldSong/Apollo) and [Sunshine](https://github.com/LizardByte/Sunshine) projects
+- **Translations** - [Weblate](https://hosted.weblate.org/projects/moonlight/moonlight-qt/)
 
 [![Build Status](https://github.com/wjbeckett/artemis/workflows/Build%20Artemis%20Qt/badge.svg)](https://github.com/wjbeckett/artemis/actions)
 [![Downloads](https://img.shields.io/github/downloads/wjbeckett/artemis/total)](https://github.com/wjbeckett/artemis/releases)
@@ -165,24 +166,73 @@ chmod +x scripts/setup-dev.sh
 # The script will install dependencies and build the project
 ```
 
-### Manual Build Requirements
+### Build Requirements
 
 #### All Platforms
-- **Qt 6.7+** (Qt 6.8+ recommended)
-- **FFmpeg 4.0+**
+- **Qt 6.11 SDK or later** (earlier versions may work but are not officially supported)
+- **FFmpeg 6.1 or later**
 - **SDL2** and **SDL2_ttf**
 - **OpenSSL**
 - **Opus codec**
+- **libplacebo v7.349.0 or later** (required for the Vulkan renderer)
 
-#### Platform-Specific Requirements
+#### Windows
+- [Visual Studio 2026](https://visualstudio.microsoft.com/downloads/) (Community edition is fine).
+  Select **MSVC** during Qt installation — MinGW is not supported.
+- [7-Zip](https://www.7-zip.org/) (only if building installers for non-development PCs)
+- Graphics Tools (only if running debug builds)
+  - Install "Graphics Tools" in the Optional Features page of the Windows Settings app.
+  - Alternatively, run `dism /online /add-capability /capabilityname:Tools.Graphics.DirectX~~~~0.0.1.0` and reboot.
+
+#### macOS
+- Xcode 15 or later (earlier versions may work but are not officially supported)
+- [create-dmg](https://github.com/sindresorhus/create-dmg) (only if building DMGs for use on non-development Macs)
+- Homebrew: `brew install qt ffmpeg opus sdl2 sdl2_ttf create-dmg`
+
+#### Linux/Unix
+- GCC or Clang
+- Install the required packages:
+  - Debian/Ubuntu:
+    - Base Requirements: `libegl1-mesa-dev libgl1-mesa-dev libopus-dev libsdl2-dev libsdl2-ttf-dev libssl-dev libavcodec-dev libavformat-dev libswscale-dev libva-dev libvdpau-dev libxkbcommon-dev wayland-protocols libdrm-dev libplacebo-dev`
+    - Qt 6: `qt6-base-dev qt6-declarative-dev libqt6svg6-dev qt6-wayland qml6-module-qtquick-controls qml6-module-qtquick-templates qml6-module-qtquick-layouts qml6-module-qtqml-workerscript qml6-module-qtquick-window qml6-module-qtquick`
+  - RedHat/Fedora (RPM Fusion repo required):
+    - Base Requirements: `openssl-devel SDL2-devel SDL2_ttf-devel ffmpeg-devel libva-devel libvdpau-devel opus-devel pulseaudio-libs-devel alsa-lib-devel libdrm-devel libplacebo-devel`
+    - Qt 6: `qt6-qtsvg-devel qt6-qtdeclarative-devel`
 
 **Windows:**
 - Visual Studio 2022 with MSVC
 - 7-Zip (for packaging)
 
-**macOS:**
-- Xcode 14+
-- Homebrew: `brew install qt6 ffmpeg opus sdl2 sdl2_ttf create-dmg`
+**Steam Link Hardware Limitations**
+Artemis builds for Steam Link are subject to hardware limitations of the Steam Link device:
+* Maximum resolution: **1080p (1920x1080)**
+* Maximum framerate: **60 FPS**
+* Maximum video bitrate: **40 Mbps**
+* **HDR streaming is not supported** on the original hardware
+
+### Docker containers
+If you want to use Docker for building, look at [this repo](https://github.com/cgutman/moonlight-packaging) containing canonical containers
+for different architectures, which handle building deps and extra linking for you.
+
+### Build Setup Steps
+1. Install the latest Qt SDK (and optionally, the Qt Creator IDE) from https://www.qt.io/download
+    * You can install Qt via Homebrew on macOS.
+    * You may also use your Linux distro's package manager for the Qt SDK.
+    * This step is not required for building on Steam Link, because the Steam Link SDK includes Qt.
+2. Download submodules and dependencies
+    * Run `git submodule update --init --recursive` from within `artemis/`.
+    * On Windows and macOS, you must also run `setup-deps.ps1` (Windows) or `setup-deps.py` (macOS).
+    * Perform these steps each time you pull new changes from the Git repository.
+3. Open the project in Qt Creator or build from qmake on the command line.
+    * To build a binary for use on non-development machines, use the scripts in the `scripts` folder.
+        * For Windows builds, use `scripts\build-arch.bat` and `scripts\generate-bundle.bat`. Execute these scripts from the root of the repository within a Qt command prompt. Ensure 7-Zip binary directory is on your `%PATH%`.
+        * For macOS builds, use `scripts/generate-dmg.sh`. Execute this script from the root of the repository and ensure Qt's `bin` folder is in your `$PATH`.
+        * For Steam Link builds, run `scripts/build-steamlink-app.sh` from the root of the repository.
+    * To build from the command line for development use on macOS or Linux, run `qmake6 artemis.pro` then `make debug` or `make release`.
+        * The final binary will be placed in `app/Artemis`.
+    * To create an embedded build for a single-purpose device, use `qmake6 "CONFIG+=embedded" artemis.pro` and build normally.
+        * This build will lack windowed mode, Discord/Help links, and other features that don't make sense on an embedded device.
+        * For platforms with poor GPU performance, add `"CONFIG+=gpuslow"` to prefer direct KMSDRM rendering over GL/Vulkan renderers. Direct KMSDRM rendering can use dedicated YUV/RGB conversion and scaling hardware rather than slower GPU shaders for these operations.
 
 **Linux:**
 ```bash

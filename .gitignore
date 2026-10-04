@@ -50,6 +50,9 @@ Thumbs.db
 # Dependencies
 node_modules/
 
+# Prebuilt dependencies fetched by setup-deps.py / setup-deps.ps1
+libs/
+
 # Generated QML cache
 *qmlcache*
 

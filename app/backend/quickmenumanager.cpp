@@ -16,6 +16,7 @@ enum KeyCombo {
     KeyComboTogglePointerRegionLock,
     KeyComboQuitAndExit,
     KeyComboToggleQuickMenu,
+    KeyComboToggleKeyboardGrab,
     KeyComboMax
 };
 
@@ -199,7 +200,7 @@ void QuickMenuManager::quit()
     
     // Set flag to exit after quit and send quit event
     if (Session::get()) {
-        Session::get()->setShouldExitAfterQuit();
+        Session::get()->setShouldExit(true);
     }
     
     SDL_Event quitEvent;
