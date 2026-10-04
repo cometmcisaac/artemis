@@ -359,11 +359,9 @@ libplacebo {
     DEFINES += HAVE_LIBPLACEBO_VULKAN
     SOURCES += \
         streaming/video/ffmpeg-renderers/plvk.cpp \
-        streaming/video/ffmpeg-renderers/plvk_c.c \
-        streaming/video/ffmpeg-renderers/pl_libav_shim.c
+        streaming/video/ffmpeg-renderers/plvk_c.c
     HEADERS += \
-        streaming/video/ffmpeg-renderers/plvk.h \
-        streaming/video/ffmpeg-renderers/pl_libav_shim.h
+        streaming/video/ffmpeg-renderers/plvk.h
 
     macx {
         SOURCES += streaming/video/ffmpeg-renderers/plvk_objc.mm

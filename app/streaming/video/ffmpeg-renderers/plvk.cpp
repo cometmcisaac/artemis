@@ -56,11 +56,6 @@ extern "C" {
 #define PL_COLOR_HDR_BLACK 0.0f
 #endif
 
-// Compatibility definitions for missing libplacebo overlay constants
-#ifndef PL_OVERLAY_COORDS_DST_FRAME
-#define PL_OVERLAY_COORDS_DST_FRAME 0
-#endif
-
 // Compatibility struct for VkQueueFamilyVideoPropertiesKHR
 #ifndef VK_KHR_video_queue
 struct VkQueueFamilyVideoPropertiesKHR {
@@ -749,6 +744,8 @@ bool PlVkRenderer::mapAvFrameToPlacebo(const AVFrame *frame, pl_frame* mappedFra
         if (!pl_map_avframe_ex(m_Vulkan->gpu, mappedFrame, &mapParams)) {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                          "pl_map_avframe_ex() failed");
+            return false;
+        }
     }
 
     // libplacebo assumes a minimum luminance value of 0 means the actual value was unknown.

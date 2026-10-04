@@ -215,7 +215,6 @@ CenteredGridView {
                     visible: !model.online && model.wakeable
                 }
                 NavigableMenuItem {
-                    parentMenu: pcContextMenu
                     // Artemis: PIN and OTP pairing entry points
                     text: qsTr("Pair")
                     onTriggered: {
@@ -228,7 +227,6 @@ CenteredGridView {
                     visible: model.online && !model.paired
                 }
                 NavigableMenuItem {
-                    parentMenu: pcContextMenu
                     text: qsTr("Pair using OTP")
                     onTriggered: {
                         // Show OTP pairing dialog
@@ -238,7 +236,6 @@ CenteredGridView {
                     visible: model.online && !model.paired
                 }
                 NavigableMenuItem {
-                    parentMenu: pcContextMenu
                     text: qsTr("Test Network")
                     onTriggered: {
                         computerModel.testConnectionForComputer(index)

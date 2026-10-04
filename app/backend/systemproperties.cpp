@@ -113,11 +113,6 @@ SystemProperties::SystemProperties()
     maximumResolution = QSize(0, 0);
 }
 
-    // Populate data that requires talking to SDL. We do it all in one shot
-    // and cache the results to speed up future queries on this data.
-    querySdlVideoInfo();
-}
-
 SystemProperties::~SystemProperties()
 {
     waitForAsyncLoad();

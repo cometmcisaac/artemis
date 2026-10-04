@@ -447,6 +447,7 @@ void Session::getDecoderInfo(SDL_Window* window,
         // Try AV1 Main8 as fallback to check for general AV1 hardware support
         // This allows AV1 to work even if 10-bit/HDR is not supported
         if (chooseDecoder(StreamingPreferences::VDS_FORCE_HARDWARE,
+                          StreamingPreferences::RS_PROBE_ONLY,
                           window, VIDEO_FORMAT_AV1_MAIN8, 1920, 1080, 60,
                           false, false, true, decoder)) {
             delete decoder;
