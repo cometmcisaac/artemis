@@ -142,8 +142,12 @@ void SystemProperties::updateDecoderProperties(bool hasHardwareAcceleration, boo
         emit supportsHdrChanged();
     }
 
-    SDL_DestroyWindow(testWindow);
-    testWindow = nullptr;
+    // Only tear down if we still own the test window. SDL_assert() is compiled out in
+    // release builds, so guard explicitly: a second call here would double-free.
+    if (testWindow) {
+        SDL_DestroyWindow(testWindow);
+        testWindow = nullptr;
+    }
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
@@ -235,10 +239,10 @@ void SystemProperties::startAsyncLoad()
                 "SystemProperties: Final HDR support status: %s",
                 supportsHdr ? "ENABLED" : "DISABLED");
 
-    SDL_DestroyWindow(testWindow);
-
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
-
+    // NB: testWindow is deliberately left alive here. The decoder probe below runs on
+    // systemPropertyQueryThread and reports back through updateDecoderProperties(),
+    // which owns the teardown of both the window and the video subsystem. Destroying
+    // them here as well would double-free testWindow.
     systemPropertyQueryThread = new SystemPropertyQueryThread(this);
     systemPropertyQueryThread->start();
 }
