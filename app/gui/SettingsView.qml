@@ -1819,16 +1819,21 @@ Flickable {
                 }
 
 // Artemis: cross-platform preferred renderer backend (Auto/Vulkan/OpenGL).
-                // Distinct from upstream's macOS-only rendererSelection combo below.
+                // This drives the Linux/Windows frontend (DRM/EGL/PlVk) selection and is
+                // meaningless on macOS, where the native Metal/AVSBDL path is used and the
+                // "Renderer" combo below is the one that applies. Hide it there so macOS
+                // users don't see two competing renderer settings.
                 Label {
                     width: parent.width
                     text: qsTr("Preferred renderer")
                     font.pointSize: 12
                     wrapMode: Text.Wrap
                     topPadding: 12
+                    visible: !SystemProperties.isDarwin
                 }
 
                 AutoResizingComboBox {
+                    visible: !SystemProperties.isDarwin
                     function createModel() {
                         var model = Qt.createQmlObject('import QtQuick 2.0; ListModel {}', parent, '')
 

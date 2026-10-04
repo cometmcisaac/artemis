@@ -1490,19 +1490,31 @@ void Session::getWindowDimensions(int& x, int& y,
         }
     }
 
+    // Resolution scaling deliberately inflates the stream past the display so the client
+    // can downscale a supersampled image. That must not feed into window sizing, or the
+    // oversized stream looks "too big for the screen" and the window collapses to the
+    // 80% fallback below. Size the window against the logical (pre-scaling) resolution.
+    int logicalWidth = m_StreamConfig.width;
+    int logicalHeight = m_StreamConfig.height;
+    if (m_Preferences->enableResolutionScaling &&
+        m_Preferences->resolutionScaleFactor > 100) {
+        logicalWidth = (m_StreamConfig.width * 100) / m_Preferences->resolutionScaleFactor;
+        logicalHeight = (m_StreamConfig.height * 100) / m_Preferences->resolutionScaleFactor;
+    }
+
     SDL_Rect usableBounds;
     if (SDL_GetDisplayUsableBounds(displayIndex, &usableBounds) == 0) {
         // If the stream resolution fits within the usable display area, use it directly
-        if (m_StreamConfig.width <= usableBounds.w &&
-            m_StreamConfig.height <= usableBounds.h) {
-            width = m_StreamConfig.width;
-            height = m_StreamConfig.height;
+        if (logicalWidth <= usableBounds.w &&
+            logicalHeight <= usableBounds.h) {
+            width = logicalWidth;
+            height = logicalHeight;
         } else {
             // Otherwise, use 80% of usable bounds and preserve aspect ratio
             SDL_Rect src, dst;
             src.x = src.y = dst.x = dst.y = 0;
-            src.w = m_StreamConfig.width;
-            src.h = m_StreamConfig.height;
+            src.w = logicalWidth;
+            src.h = logicalHeight;
 
             dst.w = ((int)(usableBounds.w * 0.80f)) & ~0x1;  // even width
             dst.h = ((int)(usableBounds.h * 0.80f)) & ~0x1;  // even height
